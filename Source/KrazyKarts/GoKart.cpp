@@ -3,6 +3,7 @@
 
 #include "GoKart.h"
 #include "Components/InputComponent.h"
+#include "Engine/World.h"
 
 // Sets default values
 AGoKart::AGoKart()
@@ -25,9 +26,15 @@ void AGoKart::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	FVector Force = GetActorForwardVector() * MaxDrivingForce * Throttle;
+
+	Force += GetAirResistance();
+	Force += GetRollingResistance();
+
 	FVector Acceleration = Force / Mass;
 
 	Velocity = Velocity + Acceleration * DeltaTime;
+
+	ApplyRotation(DeltaTime);
 
 	UpdateLocationFromVelocity(DeltaTime);
 }
@@ -38,6 +45,8 @@ void AGoKart::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &AGoKart::MoveForward);
+	PlayerInputComponent->BindAxis("MoveRight", this, &AGoKart::MoveRight);
+
 }
 
 void AGoKart::MoveForward(float Value)
@@ -56,4 +65,32 @@ void AGoKart::UpdateLocationFromVelocity(float DeltaTime)
 	{
 		Velocity = FVector::ZeroVector;
 	}
+}
+
+void AGoKart::MoveRight(float Value)
+{
+	SteeringThrow = Value;
+}
+
+void AGoKart::ApplyRotation(float DeltaTime)
+{
+	float DeltaLocation = FVector::DotProduct(GetActorForwardVector(), Velocity) * DeltaTime;
+	float RotationAngle = DeltaLocation / MinTurningRadius * SteeringThrow;
+	FQuat RotationDelta(GetActorUpVector(), RotationAngle);
+
+	Velocity = RotationDelta.RotateVector(Velocity);
+
+	AddActorWorldRotation(RotationDelta);
+}
+
+FVector AGoKart::GetAirResistance()
+{
+	return - Velocity.GetSafeNormal() * Velocity.SizeSquared() * DragCoefficient;
+}
+
+FVector AGoKart::GetRollingResistance()
+{
+	float g = - GetWorld()->GetGravityZ() / 100;
+	float NormalForce = Mass * g;
+	return - Velocity.GetSafeNormal() * RollingResistanceCoefficient * NormalForce;
 }

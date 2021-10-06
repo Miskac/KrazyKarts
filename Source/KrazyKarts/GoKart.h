@@ -34,12 +34,31 @@ private:
 	float Mass = 1000;
 
 	UPROPERTY(EditAnywhere)
+	float MinTurningRadius = 10;
+
+	UPROPERTY(EditAnywhere)
 	float MaxDrivingForce = 10000;
+
+	UPROPERTY(EditAnywhere)
+	float DragCoefficient = 16;
+
+	UPROPERTY(EditAnywhere)
+	float RollingResistanceCoefficient = 0.015;
 
 	float Throttle;
 
 	void MoveForward(float Value);
 
 	void UpdateLocationFromVelocity(float DeltaTime);
+
+	void MoveRight(float Value);
+
+	void ApplyRotation(float DeltaTime);
+
+	FVector GetAirResistance();
+
+	FVector GetRollingResistance();
+
+	float SteeringThrow;
 
 };
