@@ -4,26 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
+#include "GoKartMovementComponent.h"
 #include "GoKart.generated.h"
 
-USTRUCT()
-struct FGoKartMove
-{
-    GENERATED_BODY()
-
-	UPROPERTY()
-	float Throttle;
-
-	UPROPERTY()
-	float SteeringThrow;
-
-	UPROPERTY()
-	float DeltaTime;
-
-	UPROPERTY()
-	float Time;
-
-};
 
 USTRUCT()
 struct FGoKartState
@@ -62,22 +45,7 @@ public:
 
 private:
 
-	void SimulateMove(FGoKartMove Move);
-
-	UPROPERTY(EditAnywhere)
-	float Mass = 1000;
-
-	UPROPERTY(EditAnywhere)
-	float MinTurningRadius = 10;
-
-	UPROPERTY(EditAnywhere)
-	float MaxDrivingForce = 10000;
-
-	UPROPERTY(EditAnywhere)
-	float DragCoefficient = 16;
-
-	UPROPERTY(EditAnywhere)
-	float RollingResistanceCoefficient = 0.015;
+	void ClearAcknowledgedMoves(FGoKartMove LastMove);
 
 	void MoveForward(float Value);
 
@@ -86,24 +54,15 @@ private:
 	UFUNCTION(Server, Reliable, WithValidation)
 	void Server_SendMove(FGoKartMove Move);
 
-	void UpdateLocationFromVelocity(float DeltaTime);
-
-	void ApplyRotation(float DeltaTime, float SteeringThrowLocal);
-
-	FVector GetAirResistance();
-
-	FVector GetRollingResistance();
-
 	UPROPERTY(ReplicatedUsing = OnRep_ServerState)
 	FGoKartState ServerState;
-
-	FVector Velocity;
-
-	float Throttle;
-
-	float SteeringThrow;
-
+	
 	UFUNCTION()
 	void OnRep_ServerState();
+
+	TArray<FGoKartMove> UnacknowledgedMoves;
+
+	UPROPERTY(EditAnywhere)
+	UGoKartMovementComponent* MovementComponent;
 
 };
