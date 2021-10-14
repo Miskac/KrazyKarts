@@ -53,10 +53,20 @@ private:
 	UFUNCTION()
 	void OnRep_ServerState();
 
+	void SimulatedProxy_OnRep_ServerState();
+	void AutonomousProzy_OnRep_ServerState();
+
 	TArray<FGoKartMove> UnacknowledgedMoves;
 
 	UPROPERTY()
 	UGoKartMovementComponent* MovementComponent;
 
 	void UpdateServerState(const FGoKartMove& Move);
+
+	float ClientTimeSinceUpdate;
+	float ClientTimeBetweenLastUpdates;
+	FTransform ClientStartTransform;
+	FVector ClientStartVelocity;
+
+	void ClientTick(float DeltaTime);
 };

@@ -12,6 +12,7 @@ AGoKart::AGoKart()
 {
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
 	bReplicates = true;
 
 	MovementComponent = CreateDefaultSubobject<UGoKartMovementComponent>(TEXT("MovementComponent"));
@@ -23,6 +24,8 @@ void AGoKart::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	SetReplicateMovement(false);
+
 	if (HasAuthority())
 	{
 		NetUpdateFrequency = 1;
@@ -51,8 +54,6 @@ void AGoKart::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	
-
 	DrawDebugString(GetWorld(), FVector(0,0,100), UEnum::GetValueAsString(GetLocalRole()), this, FColor::White, DeltaTime); 
 }
 
@@ -63,7 +64,6 @@ void AGoKart::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &AGoKart::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AGoKart::MoveRight);
-
 }
 
 
